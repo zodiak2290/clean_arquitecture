@@ -15,6 +15,7 @@ public class UserEntity {
 
     private String name;
     private String email;
+    private String avatarUrl;
 
     protected UserEntity() {}
 
@@ -26,4 +27,6 @@ public class UserEntity {
     public Long getId() { return id; }
     public String getName() { return name; }
     public String getEmail() { return email; }
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 }
