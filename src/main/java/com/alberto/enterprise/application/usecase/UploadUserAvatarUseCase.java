@@ -1,5 +1,9 @@
 package com.alberto.enterprise.application.usecase;
 
+import java.util.Set;
+
+import com.alberto.enterprise.application.exception.BadRequestException;
+import com.alberto.enterprise.application.exception.NotFoundException;
 import com.alberto.enterprise.application.port.out.CacheService;
 import com.alberto.enterprise.application.port.out.EventPublisher;
 import com.alberto.enterprise.application.port.out.FileStorage;
@@ -11,7 +15,10 @@ public class UploadUserAvatarUseCase {
     private final FileStorage fileStorage;
     private final EventPublisher eventPublisher;
     private final CacheService cacheService;
-
+    
+    private static final long MAX_BYTES = 2L * 1024 * 1024; // 2MB
+    private static final Set<String> ALLOWED_TYPES = Set.of("image/png", "image/jpeg");
+    
     public UploadUserAvatarUseCase(
             UserRepository userRepository,
             FileStorage fileStorage,
@@ -27,9 +34,24 @@ public class UploadUserAvatarUseCase {
     public AvatarResponse execute(Long userId, byte[] bytes, String originalFileName, String contentType) {
         // 1) Validar que exista
         userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        	.orElseThrow(() -> new NotFoundException("User not found: " + userId));
 
-        // 2) Subir archivo
+
+        // 2) validar archivo
+        if (bytes == null || bytes.length == 0) {
+            throw new BadRequestException("File is empty");
+        }
+        if (bytes.length > MAX_BYTES) {
+            throw new BadRequestException("File too large. Max allowed is 2MB");
+        }
+        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+            throw new UnsupportedMediaTypeException("Only PNG or JPEG allowed");
+        }
+        if (originalFileName == null || originalFileName.isBlank()) {
+            throw new BadRequestException("File name is required");
+        }        
+        
+        // 3) Subir archivo
         String safeName = "user-" + userId + "-" + System.currentTimeMillis() + "-" + originalFileName;
         String avatarUrl = fileStorage.upload(bytes, safeName, contentType);
 
