@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.alberto.enterprise.application.exception.BadRequestException;
 import com.alberto.enterprise.application.exception.NotFoundException;
+import com.alberto.enterprise.application.exception.UnsupportedMediaTypeException;
 import com.alberto.enterprise.application.port.out.CacheService;
 import com.alberto.enterprise.application.port.out.EventPublisher;
 import com.alberto.enterprise.application.port.out.FileStorage;
