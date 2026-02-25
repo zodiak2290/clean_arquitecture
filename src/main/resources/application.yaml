@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: enterprise-clean-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/enterprise_db
+    username: postgres
+    password: 1234567
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
