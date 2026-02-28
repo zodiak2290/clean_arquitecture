@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.springframework.stereotype.Component;
 
 import com.alberto.enterprise.application.port.out.FileStorage;
 
-@Component
+
 public class LocalFileStorage implements FileStorage {
     @Override
     public String upload(byte[] bytes, String fileName, String contentType) {

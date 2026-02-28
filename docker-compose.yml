@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:17
+    container_name: enterprise-db
+    environment:
+      POSTGRES_DB: enterprise_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234567
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: enterprise-api
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/enterprise_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234567
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+      # S3 (las ponemos ya para cuando lo habilites)
+      APP_STORAGE_PROVIDER: s3
+      APP_STORAGE_BUCKET: alberto-enterprise-avatars-2026
+      APP_AWS_REGION: us-west-2
+
+      # Credenciales AWS (mejor usar IAM Role; en local puedes usar env)
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  pgdata:
+  uploads:
