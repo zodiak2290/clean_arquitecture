@@ -21,3 +21,13 @@ app:
      bucket: ${APP_STORAGE_BUCKET:}
    aws:
      region: ${APP_AWS_REGION:us-west-2}
+management:
+   endpoints:
+     web:
+       exposure:
+         include: health,info,prometheus
+   endpoint:
+     health:
+       show-details: always
+       probes:
+         enable: true
