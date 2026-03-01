@@ -51,6 +51,16 @@ services:
       - "9090:9090"
     depends_on:
       - app
+  grafana:
+    image: grafana/grafana:latest
+    container_name: enterprise-grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
 volumes:
   pgdata:
   uploads:
+  grafana-data:

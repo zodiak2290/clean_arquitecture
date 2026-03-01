@@ -31,3 +31,8 @@ management:
        show-details: always
        probes:
          enable: true
+   metrics:
+     enable:
+       jvm: true
+       process: true
+       system: true
