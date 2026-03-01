@@ -58,8 +58,10 @@ services:
     image: nginx:1.27-alpine
     container_name: enterprise-nginx
     depends_on:
-      - app1
-      - app2
+     app1:
+       condition: service-healthy
+     app2:
+       condition: service_healthy
     ports:
       - "8080:80"
     volumes:
