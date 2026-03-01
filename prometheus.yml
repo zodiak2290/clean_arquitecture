@@ -3,18 +3,26 @@ global:
   external_labels:
     application: enterprise-clean-api
     namespace: local
+  evaluation_interval: 15s
 
 scrape_configs:
-    - job_name: 'enterprise-api'
-      metrics_path: '/actuator/prometheus'
-      static_configs:
-        - targets: ['enterprise-api:8080']
-          labels:
-            application: enterprise-api
-            namespace: local
-            version: v1
-      relabel_configs:
-        - source_labels: [__address__]
-          target_label: instance
-        - target_label: namespace
-          replacement: local
+  - job_name: "enterprise-api"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["app1:8080"]
+        labels:
+          application: enterprise-api
+          namespace: local
+          version: v1
+          replica: "1"
+
+      - targets: ["app2:8080"]
+        labels:
+          application: enterprise-api
+          namespace: local
+          version: v1
+          replica: "2"
+
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance

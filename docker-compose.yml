@@ -1,4 +1,30 @@
 version: "3.9"
+x-app-common: &app-common
+  build: .
+  depends_on:
+    - db
+  environment:
+    SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/enterprise_db
+    SPRING_DATASOURCE_USERNAME: postgres
+    SPRING_DATASOURCE_PASSWORD: 1234567
+    SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+    APP_STORAGE_PROVIDER: s3
+    APP_STORAGE_BUCKET: alberto-enterprise-avatars-2026
+    APP_AWS_REGION: us-west-2
+
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+  expose:
+    - "8080"
+  volumes:
+    - uploads:/app/uploads
+  healthcheck:
+    test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+    interval: 10s
+    timeout: 3s
+    retries: 10
+
 services:
   db:
     image: postgres:17
@@ -11,36 +37,35 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - enterprise-net
+  # Replica 1
+  app1:
+     <<: *app-common
+     container_name: enterprise-api-1
+     networks:
+       - enterprise-net
 
-  app:
-    build: .
-    container_name: enterprise-api
+  # Replica 2
+  app2:
+     <<: *app-common
+     container_name: enterprise-api-2
+     networks:
+       - enterprise-net
+
+  # Load Balancer (tu API ahora se consume por aquí)
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: enterprise-nginx
     depends_on:
-      - db
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/enterprise_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 1234567
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-
-      # S3 (las ponemos ya para cuando lo habilites)
-      APP_STORAGE_PROVIDER: s3
-      APP_STORAGE_BUCKET: alberto-enterprise-avatars-2026
-      APP_AWS_REGION: us-west-2
-
-      # Credenciales AWS (mejor usar IAM Role; en local puedes usar env)
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-
+      - app1
+      - app2
     ports:
-      - "8080:8080"
+      - "8080:80"
     volumes:
-      - uploads:/app/uploads
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - enterprise-net
 
   prometheus:
     image: prom/prometheus:latest
@@ -50,7 +75,10 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - app
+      - app1
+      - app2
+    networks:
+      - enterprise-net
   grafana:
     image: grafana/grafana:latest
     container_name: enterprise-grafana
@@ -60,7 +88,12 @@ services:
       - prometheus
     volumes:
       - grafana-data:/var/lib/grafana
+    networks:
+     - enterprise-net
 volumes:
   pgdata:
   uploads:
   grafana-data:
+networks:
+  enterprise-net:
+    driver: bridge
