@@ -15,12 +15,22 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  cache:
+    type: redis
+  data:
+    redis:
+      host: redis
+      port: 6379
+cache:
+    ttl: 60000
 app:
    storage:
      provider: ${APP_STORAGE_PROVIDER:local}
      bucket: ${APP_STORAGE_BUCKET:}
    aws:
      region: ${APP_AWS_REGION:us-west-2}
+   cache:
+     provider: ${APP_CACHE_PROVIDER:inmemory}
 management:
    endpoints:
      web:

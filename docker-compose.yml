@@ -1,8 +1,9 @@
-version: "3.9"
+# version: "3.9"
 x-app-common: &app-common
   build: .
   depends_on:
     - db
+    - redis
   environment:
     SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/enterprise_db
     SPRING_DATASOURCE_USERNAME: postgres
@@ -15,6 +16,9 @@ x-app-common: &app-common
 
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    APP_CACHE_PROVIDER: redis
+    SPRING_DATA_REDIS_HOST: redis
+    SPRING_DATA_REDIS_PORT: 6379
   expose:
     - "8080"
   volumes:
@@ -59,7 +63,7 @@ services:
     container_name: enterprise-nginx
     depends_on:
      app1:
-       condition: service-healthy
+       condition: service_healthy
      app2:
        condition: service_healthy
     ports:
@@ -90,6 +94,14 @@ services:
       - prometheus
     volumes:
       - grafana-data:/var/lib/grafana
+    networks:
+     - enterprise-net
+  redis:
+    image: redis:7
+    container_name: enterprise-redis
+    ports:
+      - "6379:6379"
+    restart: always	
     networks:
      - enterprise-net
 volumes:

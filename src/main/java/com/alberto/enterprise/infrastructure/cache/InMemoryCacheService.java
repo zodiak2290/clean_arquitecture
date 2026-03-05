@@ -14,7 +14,7 @@ public class InMemoryCacheService implements CacheService {
     private final Map<String, String> map = new ConcurrentHashMap<>();
 
     @Override
-    public void put(String key, String value, int ttlSeconds) {
+    public void put(String key, String value, long ttlSeconds) {
         map.put(key, value); // MVP: sin TTL real
     }
 
