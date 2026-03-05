@@ -9,6 +9,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.alberto.enterprise.infrastructure.security.JwtAuthFilter;
+import com.alberto.enterprise.infrastructure.web.UserMdcFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -33,6 +34,7 @@ public class SecurityConfig {
                 .httpBasic(b -> b.disable())
                 .formLogin(f -> f.disable())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new UserMdcFilter(), JwtAuthFilter.class)
                 .build();
     }
 }

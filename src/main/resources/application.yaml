@@ -30,9 +30,14 @@ management:
      health:
        show-details: always
        probes:
-         enable: true
+         enabled: true
    metrics:
      enable:
        jvm: true
        process: true
        system: true
+     distribution:
+       percentiles-histogram:
+         http.server.requests: true
+       percentiles:
+         http.server.requests: 0.5,0.85,0.95,0.99
