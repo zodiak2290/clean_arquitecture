@@ -2,8 +2,10 @@
 x-app-common: &app-common
   build: .
   depends_on:
-    - db
-    - redis
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
   environment:
     SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/enterprise_db
     SPRING_DATASOURCE_USERNAME: postgres
@@ -41,6 +43,12 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d enterprise_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - enterprise-net
   # Replica 1
@@ -97,17 +105,27 @@ services:
     networks:
      - enterprise-net
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: enterprise-redis
     ports:
       - "6379:6379"
-    restart: always	
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     networks:
      - enterprise-net
 volumes:
   pgdata:
   uploads:
   grafana-data:
+  redis-data:
 networks:
   enterprise-net:
     driver: bridge
