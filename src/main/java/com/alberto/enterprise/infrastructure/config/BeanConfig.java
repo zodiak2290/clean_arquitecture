@@ -7,6 +7,7 @@ import com.alberto.enterprise.application.port.out.CacheService;
 import com.alberto.enterprise.application.port.out.EventPublisher;
 import com.alberto.enterprise.application.port.out.FileStorage;
 import com.alberto.enterprise.application.usecase.CreateUserUseCase;
+import com.alberto.enterprise.application.usecase.GetUserUseCase;
 import com.alberto.enterprise.application.usecase.UploadUserAvatarUseCase;
 import com.alberto.enterprise.domain.repository.UserRepository;
 
@@ -19,12 +20,17 @@ public class BeanConfig {
     }
     
     @Bean
-    public UploadUserAvatarUseCase uploadUserAvatarUseCase(
+    UploadUserAvatarUseCase uploadUserAvatarUseCase(
             UserRepository userRepository,
             FileStorage fileStorage,
             EventPublisher eventPublisher,
             CacheService cacheService
     ) {
         return new UploadUserAvatarUseCase(userRepository, fileStorage, eventPublisher, cacheService);
+    }
+    
+    @Bean
+    GetUserUseCase getUserUseCase(UserRepository userRepository, CacheService cacheService, EventPublisher eventPublisher) {
+        return new GetUserUseCase(userRepository, cacheService, eventPublisher);
     }
 }

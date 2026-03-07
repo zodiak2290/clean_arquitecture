@@ -64,7 +64,7 @@ La API queda accesible en `http://localhost:8080`.
 ### 4. Endpoints útiles
 
 - `POST /auth/login` – obtiene JWT (imaginario, depende de implementación).
-- `GET /users/{id}` – ejemplo de uso.
+- `GET /users/{id}` – obtiene la entidad (se comprueba primero el caché Redis/in‑memory, si no está se lee de la BD y se almacena).
 - Actuator: `/actuator/health`, `/actuator/prometheus`.
 
 ## 📦 Dockerfile y Compose

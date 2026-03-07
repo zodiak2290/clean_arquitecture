@@ -21,7 +21,14 @@ public class CreateUserUseCase {
     	public User execute(String name, String email) {
     	  User saved = userRepository.save(new User(name, email));
     	  eventPublisher.publish("user.created", saved.getEmail());
-    	  cacheService.put("user:" + saved.getId(), saved.getEmail(), 300);
-    	  return saved;
+
+      // cache entire user payload (name|email) so lookups can return quickly
+      cacheService.put("user:" + saved.getId(), serialize(saved), 300);
+      return saved;
+    }
+
+    private String serialize(User u) {
+        // simple delimiter-based format, the key already contains the id
+        return u.getName() + "|" + u.getEmail();
     	}
 }
