@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import com.alberto.enterprise.application.port.out.CacheService;
 import com.alberto.enterprise.infrastructure.cache.InMemoryCacheService;
 import com.alberto.enterprise.infrastructure.cache.RedisCacheService;
+import com.alberto.enterprise.infrastructure.metrics.CacheMetrics;
 
 @Configuration
 public class CacheConfig {
@@ -16,8 +17,8 @@ public class CacheConfig {
   @Bean
   @Primary
   @ConditionalOnProperty(name = "app.cache.provider", havingValue = "redis")
-  CacheService redisCacheService(StringRedisTemplate redisTemplate) {
-    return new RedisCacheService(redisTemplate);
+  CacheService redisCacheService(StringRedisTemplate redisTemplate, CacheMetrics metrics) {
+    return new RedisCacheService(redisTemplate, metrics);
   }
 
   @Bean
